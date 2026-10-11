@@ -1,0 +1,67 @@
+@model IEnumerable<AuctionApp.Models.Auctions.AuctionVm>
+
+@{
+    ViewData["Title"] = "Active Auctions";
+}
+
+<h1>Active Auctions</h1>
+
+<!-- HÄR FÅNGAR VI FELMEDDELANDEN FRÅN CONTROLLERN -->
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <strong>Failure!</strong> @TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <strong>Success!</strong> @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<p class="mb-4">
+    <!-- <a asp-action="Create" class="btn btn-primary">Create new auction</a> -->
+    @Html.ActionLink("Create new auction", "Create", "Auctions", null, new { @class = "btn btn-primary" })
+    @Html.ActionLink("My Active Bids", "MyBids", "Auctions", null, new { @class = "btn btn-outline-info ms-2" })
+    @Html.ActionLink("Won Auctions", "WonAuctions", "Auctions", null, new { @class = "btn btn-outline-success ms-2" })
+</p>
+
+<!-- HANTERING AV TOM LISTA -->
+@if (!Model.Any())
+{
+    <div class="alert alert-info">
+        These are no active auctions for the moment, become the first one and create one!
+    </div>
+}
+else
+{
+    <table class="table table-striped table-hover mt-3">
+        <thead class="table-dark">
+        <tr>
+            <th>@Html.DisplayNameFor(model => model.Title)</th>
+            <th>@Html.DisplayNameFor(model => model.OwnerName)</th>
+            <th>@Html.DisplayNameFor(model => model.StartingPrice)</th>
+            <th>@Html.DisplayNameFor(model => model.EndDate)</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var item in Model) {
+            <tr>
+                <td class="align-middle">@Html.DisplayFor(modelItem => item.Title)</td>
+                <td class="align-middle">@Html.DisplayFor(modelItem => item.OwnerName)</td>
+                <td class="align-middle">@Html.DisplayFor(modelItem => item.StartingPrice)</td>
+                <td class="align-middle">@Html.DisplayFor(modelItem => item.EndDate)</td>
+                <td>
+                    @Html.ActionLink("Details", "Details", new { id = item.Id }, new { @class = "btn btn-sm btn-info text-white" }) |
+                    @Html.ActionLink("Edit", "Edit", "Auctions", new { id = item.Id }, new { @class = "btn btn-sm btn-warning text-dark ms-1" })
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}

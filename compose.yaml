@@ -1,0 +1,12 @@
+﻿services:
+  mysql:
+    image: mysql:8
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: auction_db
+      MYSQL_USER: saeedk
+      MYSQL_PASSWORD: saeedk123
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3306:3306"
+
