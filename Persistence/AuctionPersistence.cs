@@ -1,8 +1,9 @@
 using System.Data;
-using AuctionApp.Persistence;
+using AuctionApp.Core;
+using AuctionApp.Core.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
-namespace AuctionApp.Core.Interfaces;
+namespace AuctionApp.Persistence;
 
 public class AuctionPersistence : IAuctionPersistence
 {
@@ -33,7 +34,7 @@ public class AuctionPersistence : IAuctionPersistence
         return activeAuctions;
     }
 
-    public Auction GetById(int id)
+    public Auction GetAuctionById(int id)
     {
         AuctionDB adb = _auctionRepository.Query()
                         .Include(adb => adb.BidDbs 
@@ -55,7 +56,7 @@ public class AuctionPersistence : IAuctionPersistence
         return auction; 
     }
 
-    public void Save(Auction auction)
+    public void AddAuction(Auction auction)
     {
         AuctionDB auctionDB = new  AuctionDB()
             {
@@ -68,14 +69,9 @@ public class AuctionPersistence : IAuctionPersistence
         _auctionRepository.Add(auctionDB);
     }
 
-    public void Update(Auction auction)
+    public void UpdateAuction(Auction auction)
     {
         AuctionDB existingAdb = _auctionRepository.GetById(auction.Id);
-        if (existingAdb == null)
-        {
-            throw new DataException("Auction not found.");
-        }
-
         existingAdb.Description = auction.Description;
         _auctionRepository.Update(existingAdb);
     }
@@ -132,5 +128,40 @@ public class AuctionPersistence : IAuctionPersistence
                 null))
             .ToList();
 
+    }
+
+    public List<Auction> GetAuctionsByOwnerName(string userName)
+    { 
+        
+        List<Auction> auctions = _auctionRepository
+            .Query()
+            .Where(adb => adb.OwnerName.Equals(userName))
+            .OrderBy(adb => adb.EndDate)
+            .Select(adb => new Auction(
+                adb.Id,
+                adb.Title,
+                adb.Description,
+                adb.OwnerName,
+                adb.StartingPrice,
+                adb.EndDate,
+                null))
+            .ToList();
+
+        return auctions;
+    }
+    
+    public void DeleteAuction(int id)
+    {
+        AuctionDB auction =  _auctionRepository.GetById(id);
+        _auctionRepository.Remove(auction);
+        
+    }
+
+    public void DeleteAllDataForUser(string userName)
+    {
+        var tx = _auctionRepository.BeginTransaction();
+        _bidRepository.DeleteWhere(b => b.BidderName.Equals(userName));
+        _auctionRepository.DeleteWhere(a => a.OwnerName.Equals(userName));
+        tx.Commit();
     }
 }

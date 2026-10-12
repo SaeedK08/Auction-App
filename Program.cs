@@ -17,8 +17,12 @@ builder.Services.AddDbContext<AuctionDBContext>(options =>
 builder.Services.AddDbContext<AppIdentityDbContext>(options =>
     options.UseMySQL(builder.Configuration.GetConnectionString("IdentityDbConnection")));
 
-builder.Services.AddDefaultIdentity<AppIdentityUser>(options => 
-    options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<AppIdentityDbContext>();
+
+// Configure Identity framework
+builder.Services.AddDefaultIdentity<AppIdentityUser>(options =>
+        options.SignIn.RequireConfirmedAccount = true)
+            .AddRoles<IdentityRole>()
+            .AddEntityFrameworkStores<AppIdentityDbContext>();
 
 // Dependency Injections
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
@@ -47,5 +51,28 @@ app.MapRazorPages();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+// --- SEED ADMIN ROLE ---
+using (var scope = app.Services.CreateScope())
+{
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<AppIdentityUser>>(); // Byt ut AppIdentityUser mot IdentityUser om du inte skapat en egen
+
+    // Check if the role already exits
+    if (!await roleManager.RoleExistsAsync("Admin"))
+    {
+        await roleManager.CreateAsync(new IdentityRole("Admin"));
+    }
+
+    // Change role to Admin
+    // Change the e-post address to one you want to promote, make sure the e-post address is registered
+    var adminUser = await userManager.FindByEmailAsync("admin@kth.se"); 
+    
+    if (adminUser != null && !await userManager.IsInRoleAsync(adminUser, "Admin"))
+    {
+        await userManager.AddToRoleAsync(adminUser, "Admin");
+    }
+}
+// -----------------------
 
 app.Run();

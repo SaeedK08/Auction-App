@@ -1,6 +1,8 @@
 using System.Data;
+using System.Linq.Expressions;
 using AuctionApp.Persistence;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace AuctionApp.Persistence;
 
@@ -16,13 +18,18 @@ public class Repository<T> : IRepository<T> where T : class
     }
     public T GetById(int id)
     {
-        return  _dbSet.Find(id);
+        T t = _dbSet.Find(id);
+        if (t == null)
+        {
+            throw new KeyNotFoundException("The specified item does not exist in the database");
+        }
+        return t;
     }
 
-    public IEnumerable<T> GetAll()
-    {
-        return _dbSet.ToList();
-    }
+    // public IEnumerable<T> GetAll()
+    // {
+    //     return _dbSet.ToList();
+    // }
 
     public IQueryable<T> Query()
     {
@@ -66,5 +73,15 @@ public class Repository<T> : IRepository<T> where T : class
         {
             throw new DataException("An error occured when trying to remove an entity to the database");
         }
+    }
+
+    public int DeleteWhere(Expression<Func<T, bool>> predicate)
+    {
+        return _dbSet.Where(predicate).ExecuteDelete();
+    }
+
+    public IDbContextTransaction BeginTransaction()
+    {
+        return _dbContext.Database.BeginTransaction();
     }
 }

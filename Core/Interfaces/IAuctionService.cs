@@ -9,5 +9,7 @@ public interface IAuctionService
     void PlaceBid(int auctionId, string bidderName, int amount);
     List<Auction> GetOngoingAuctionsByBidder(string userName);
     List<Auction> GetWonAuctionsBy(string userName);
-    // Fler metoder för budgivning etc. kommer vi lägga till senare
+    List<Auction> GetAuctionsByOwnerName(string ownerName);
+    void DeleteAuction(int id);
+    void DeleteAllDataForUser(string userName);
 }

@@ -18,7 +18,7 @@ public class AuctionService : IAuctionService
 
     public Auction GetAuctionById(int id)
     {
-        Auction result = _auctionPersistence.GetById(id);
+        Auction result = _auctionPersistence.GetAuctionById(id);
         if (result == null)
         {
             throw new KeyNotFoundException($"Auction not found");
@@ -29,7 +29,7 @@ public class AuctionService : IAuctionService
     public void CreateAuction(string title, string description, string ownerName, int startingPrice, DateTime endDate)
     {
         Auction auction = new Auction(title, description, ownerName, startingPrice, endDate);
-        _auctionPersistence.Save(auction);
+        _auctionPersistence.AddAuction(auction);
     }
 
     public void UpdateDescription(int id, string description, string requestingUser)
@@ -41,7 +41,7 @@ public class AuctionService : IAuctionService
         }
         auction.UpdateDescription(description); 
     
-        _auctionPersistence.Update(auction); 
+        _auctionPersistence.UpdateAuction(auction); 
     }
 
     public void PlaceBid(int auctionId, string bidderName, int amount)
@@ -60,5 +60,20 @@ public class AuctionService : IAuctionService
     public List<Auction> GetWonAuctionsBy(string userName)
     {
         return _auctionPersistence.GetWonAuctionsBy(userName);
+    }
+
+    public List<Auction> GetAuctionsByOwnerName(string ownerName)
+    {
+        return  _auctionPersistence.GetAuctionsByOwnerName(ownerName);
+    }
+
+    public void DeleteAuction(int id)
+    {
+        _auctionPersistence.DeleteAuction(id);
+    }
+
+    public void DeleteAllDataForUser(string userName)
+    {
+        _auctionPersistence.DeleteAllDataForUser(userName);
     }
 }
